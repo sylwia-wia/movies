@@ -1,0 +1,86 @@
+{% extends "./base.html.twig" %}
+
+{% block body %}
+
+    <div class="sm:w-3/5 w-4/5 mx-auto">
+        <h1 class="pt-20 sm:text-5xl md:text-7xl text-4xl font-bold text-center">
+            {{ movie.title }}
+        </h1>
+
+        <div class="py-10 text-center">
+            <div class="inline-block sm:pt-1">
+
+                <p class="text-sm text-gray-600">
+                    28-01-2022 4 min. read
+                </p>
+            </div>
+        </div>
+
+        <img
+                src="{{ movie.imagePath }}"
+                class="rounded-xl w-full shadow-xl"
+        />
+
+        <p class="text-xl py-6">
+            {{ movie.description }}
+        </p>
+
+        <a
+                href="{{  path('movie_edit', { slug: movie.slug}) }}"
+                class="uppercase mt-15 bg-blue-500 text-gray-100 w-1/8 mt-10 font-extrabold py-4 px-8 rounded-xl">
+            Edytuj Film
+        </a>
+
+        <a
+                href="{{ path('movie_delete', { slug: movie.slug }) }}"
+                class="uppercase ml-2 mt-15 bg-blue-500 text-gray-100 w-1/8 mt-10 font-extrabold py-4 px-8 rounded-xl">
+            Usuń film
+        </a>
+    </div>
+
+    <div class="comment-container sm:w-3/5 w-4/5 mx-auto mt-10">
+        <div>
+            <h2>KOMENTARZE ({{ comments|length }}) </h2>
+        </div>
+
+        {{ form_start(form) }}
+            {{ form_row(form.text) }}
+            <button
+                type="submit"
+                class="uppercase mt-15 bg-blue-500 text-gray-100 w-1/8 mt-10 font-extrabold py-4 px-8 rounded-xl">
+                Dodaj
+            </button>
+        {{ form_end(form) }}
+    </div>
+
+
+    <div class="mt-10 sm:w-3/5 w-4/5 mx-auto mb-10">
+    {% if comments|length > 0 %}
+        {% for comment in comments %}
+            {% if comment.photofilename %}
+                <img src="{{ asset('images/' ~ comment.photofilename) }}" />
+            {% endif %}
+
+            <h4>{{ app.user.username }}</h4>
+            <small>
+                {{ comment.createdAt|format_datetime('medium', 'short') }}
+            </small>
+
+            <p class="mb-4">{{ comment.text }}</p>
+        {% endfor %}
+
+        {% if previous >= 0 %}
+            <a class="mt-6 px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white rounded"
+                href="{{ path('movie_show', { slug: movie.slug, offset: previous }) }}">Poprzednia</a>
+        {% endif %}
+        {% if next < comments|length %}
+            <a class="px-4 py-2 text-sm font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white rounded"
+               href="{{ path('movie_show', { slug: movie.slug, offset: next }) }}">Następna</a>
+        {% endif %}
+    {% else %}
+        <div>Brak komentarzy.</div>
+    {% endif %}
+    </div>
+
+{% endblock %}
+

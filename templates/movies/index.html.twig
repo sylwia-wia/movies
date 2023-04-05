@@ -1,0 +1,75 @@
+{% extends "./base.html.twig" %}
+
+{% block body %}
+    <div class="w-4/5 m-auto text-center">
+        <div class="py-12 border-b border-gray-200">
+            <h1 class="text-6xl pt-12 pb-8">
+{#                Movies Review ({{ movies|length }})#}
+            </h1>
+        </div>
+    </div>
+
+    <div class="md:grid lg:grid-cols-3 gap-20 w-4/5 mx-auto py-15 mt-6 ">
+      {% if app.user %}
+          <div>
+              <a
+                      href="/movies/create"
+                      class="uppercase border border-gray-500 text-lg py-4 px-6 rounded transition transition-all bg-gray-800 text-white hover:bg-white hover:text-gray-800 float-left ml-20">
+                  Dodaj film
+              </a>
+          </div>
+      {% endif%}
+        <div></div>
+
+    {% if page > 1 %}
+    {% set rowNumber = 1 + ((page - 1) * 10) %}
+    {% else %}
+    {% set rowNumber = 1 %}
+    {% endif %}
+
+
+{#        //{% include('./components/search.html.twig') %}#}
+        {{ form_start(filterForm) }}
+        <div class="row">
+            <div class="col">
+                {{ form_row(filterForm.search, {'label': false}) }}
+            </div>
+
+            <div class="col">
+                {{ form_widget(filterForm.submit) }}
+                <a
+                        class="uppercase border border-gray-500 text-lg py-4 px-6 rounded transition transition-all bg-gray-800 text-white hover:bg-white hover:text-gray-800 float-right mr-20"
+                        href="{{ url('movies') }}">Wyczyść</a>
+            </div>
+        </div>
+        {{ form_end(filterForm) }}
+    </div>
+
+
+
+    <div class="md:grid lg:grid-cols-3 gap-20 w-4/5 mx-auto py-15 ">
+        <!-- Review Item -->
+        {% for movie in pagination %}
+            <div class="text-center pt-8 pb-4" >
+                <img
+                        style="width: 400px; height: 400px"
+                        src="{{ movie.imagePath }}"
+                        alt=""
+                        class="block shadow-xl rounded-md mx-auto"
+                />
+
+                <h2 class="block text-gray-700 font-bold text-3xl py-2 ">
+                    {{ movie.title }}
+                </h2>
+
+                <p class="block text-base text-gray-700 pt-4 pb-10 leading-8 font-light">
+                    {{ movie.description }}
+                </p>
+
+                <a href="{{  path('movie_show', { slug: movie.slug }) }}" class="uppercase border border-gray-500 text-gray-600 text-lg py-4 px-12 rounded transition transition-all hover:bg-gray-800 hover:text-white">
+                    Keep Reading
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
