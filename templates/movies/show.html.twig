@@ -1,7 +1,6 @@
 {% extends "./base.html.twig" %}
 
 {% block body %}
-
     <div class="sm:w-3/5 w-4/5 mx-auto">
         <h1 class="pt-20 sm:text-5xl md:text-7xl text-4xl font-bold text-center">
             {{ movie.title }}
@@ -61,7 +60,7 @@
                 <img src="{{ asset('images/' ~ comment.photofilename) }}" />
             {% endif %}
 
-            <h4>{{ app.user.username }}</h4>
+            <h4>{{ app.user.username ?? "Proszę zalogować się do konta" }}</h4>
             <small>
                 {{ comment.createdAt|format_datetime('medium', 'short') }}
             </small>

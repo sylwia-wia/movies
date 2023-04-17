@@ -1,0 +1,86 @@
+{#<div {{ stimulus_controller('say-hello') }}>#}
+{#     <input type="text" {{ stimulus_target('say-hello', 'name') }}>#}
+
+{#     <button {{ stimulus_action('say-hello', 'greet') }}>#}
+{#          Greet#}
+{#     </button>#}
+
+{#     <div {{ stimulus_target('say-hello', 'output') }}></div>#}
+{#</div>#}
+
+
+{{ form_start(form) }}
+
+
+{#     {% include 'components/file_upload_template.html.twig' %}#}
+<div class="row" >
+     <div class="col-lg">
+
+          <div class="row">
+               <div class="col">
+                    {{ form_row(form.title) }}
+               </div>
+          </div>
+
+          <div class="row">
+               <div class="col">
+                    {{ form_row(form.releaseYear) }}
+               </div>
+               <div class="col">
+                    {{ form_row(form.category) }}
+               </div>
+          </div>
+
+          <div class="row">
+               <div class="col">
+                    {{ form_row(form.description) }}
+               </div>
+               <div class="col">
+                    {{ form_row(form.imagePath) }}
+               </div>
+          </div>
+
+     </div>
+
+{#     {{ form_row(form.imagePath) }}#}
+
+{#     <div class="col d-none d-xxl-block">#}
+{#          <div class="row">#}
+{#               <div class="col">#}
+{#                    <div class="d-none">#}
+{#                         {{ form_row(form.imagePath) }}#}
+{#                    </div>#}
+
+{#                    <div id="file-input-container" class="flex items-center justify-center w-full">#}
+{#                         <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">#}
+{#                              <div class="flex flex-col items-center justify-center pt-5 pb-6">#}
+{#                                   <svg aria-hidden="true" class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>#}
+{#                                   <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>#}
+{#                                   <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>#}
+{#                              </div>#}
+{#                              <input id="dropzone-file" type="file" class="hidden" />#}
+{#                         </label>#}
+{#                    </div>#}
+
+{#               </div>#}
+{#          </div>#}
+
+{#          {% if movie.imagePath %}#}
+{#               <div class="row">#}
+{#                    <div class="col">#}
+{#                         <div class="ratio ratio-1x1">#}
+{#                              <iframe src="{{ url('movie_render_file', {'id': movie.id})}}"></iframe>#}
+{#                         </div>#}
+{#                    </div>#}
+{#               </div>#}
+{#          {% endif %}#}
+{#     </div>#}
+
+     <button
+             type="submit"
+             class="uppercase mt-15 bg-blue-500 text-gray-100 text-lg font-extrabold py-4 px-8 rounded-3xl">
+          Submit Post
+     </button>
+{#</div>#}
+
+{{ form_end(form) }}

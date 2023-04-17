@@ -11,12 +11,13 @@ use App\Form\MovieFilterType;
 use App\Form\MovieFormType;
 use App\Repository\CommentRepository;
 use App\Repository\MovieRepository;
+use App\Service\UploadedHelper;
 use ContainerOw1OHe2\get_Console_Command_ValidatorDebug_LazyService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -27,16 +28,15 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class MovieController extends AbstractController
 {
-    public function __construct(private MovieRepository $movieRepository, private EntityManagerInterface $em)
+    public function __construct(private readonly MovieRepository $movieRepository, private readonly EntityManagerInterface $em)
     {
 
     }
 
-    #[Route('/movies', methods: ['GET'], name: 'movies')]
+    #[Route('/', name: 'movies', methods: ['GET'])]
     public function index(Request $request, PaginatorInterface $paginator): Response
     {
         $filterData = new MovieFilterDto();
-
         $filterForm = $this->createForm(MovieFilterType::class, $filterData);
         $filterForm->handleRequest($request);
 
@@ -66,35 +66,25 @@ class MovieController extends AbstractController
         ]);
     }
 
-//    #[IsGranted('ROLE_ADMIN', message: 'Nie masz odpowiednich uprawnień.')]
     #[Route('/movies/create', name: 'create_movie')]
-    public function create(Request $request): Response
+    public function create(Request $request, UploadedHelper $uploadedHelper): Response
     {
+
         $movie = new Movie();
         $form = $this->createForm(MovieFormType::class, $movie);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $imagePath = $form->get('imagePath')->getData();
-//            $imagePath = $movie->getImage();
-            $newMovie = $form->getData();
 
-            if ($imagePath) {
-                $newFileName = uniqid() . '.' . $imagePath->guessExtension();
+            $uploadedFile = $form->get('imagePath')->getData();
 
-                try {
-                    $imagePath->move(
-                        $this->getParameter('kernel.project_dir') . '/public/uploads',
-                        $newFileName
-                    );
-                } catch (FileException $e) {
-                    return new Response($e->getMessage());
-                }
-
-                $newMovie->setImagePath('/uploads/' . $newFileName);
+            if($uploadedFile)
+            {
+                $newFileName = $uploadedHelper->uploadMovieImage($uploadedFile);
+                $movie->setImagePath('/uploads/' . $newFileName);
             }
 
-            $this->em->persist($newMovie);
+            $this->em->persist($movie);
             $this->em->flush();
 
             return $this->redirectToRoute('movies');
@@ -102,12 +92,13 @@ class MovieController extends AbstractController
 
 
         return $this->render('/movies/create.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'movie' => $movie,
         ]);
     }
 
     #[Route('/movies/edit/{slug}', name: 'movie_edit', methods: ['GET', 'POST'])]
-    public function edit($slug, Request $request, #[Autowire('%file_dir%')] string $fileDir): Response
+    public function edit($slug, Request $request, #[Autowire('%app.file_dir%')] string $fileDir): Response
     {
         $movie = $this->movieRepository->findOneBy(['slug' => $slug]);
         $form = $this->createForm(MovieFormType::class, $movie);
@@ -128,37 +119,20 @@ class MovieController extends AbstractController
         ]);
     }
 
-    #[Route('movies/{slug}', methods: ['GET', 'POST'], name: 'movie_show')]
-    public function show($slug, Request $request, #[CurrentUser] ?User $user, ?Movie $movie, CommentRepository $commentRepository)
+    #[Route('movies/{slug}', name: 'movie_show', methods: ['GET', 'POST'])]
+    public function show(Request $request, #[CurrentUser] ?User $user, ?Movie $movie, CommentRepository $commentRepository)
     {
         $offset = max(0, $request->query->getInt('offset', 0));
 
         $comment = new Comment();
-        $form = $this->createForm(CommentFormType::class, $comment);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $newComment = $form->getData();
-            $newComment->setCreatedAt(
-                new \DateTimeImmutable(date('m/d/Y h:i:s a', time()))
-            );
-            $newComment->setUserId($this->getUser());
-          //  dd($this->movieRepository->find($id));
-
-            $newComment->setMovie($this->movieRepository->find($slug));
-
-
-
-            $this->em->persist($newComment);
-            $this->em->flush();
-
-            return $this->redirectToRoute('movie_show', ['id' => $movie->getId()]);
-        }
+        $form = $this->createForm(CommentFormType::class, $comment, [
+            'action' => $this->generateUrl('comment_add', ['movie_id' => $movie->getId()])
+        ]);
 
         $paginator = $commentRepository->getCommentPaginator($movie, $offset);
 
         return $this->render('movies/show.html.twig', [
-            'user' => $user,
+            'user' => $this->getUser(),
             'movie' => $movie,
             'form' => $form,
             'comments' => $paginator,
@@ -167,7 +141,8 @@ class MovieController extends AbstractController
         ]);
     }
 
-    #[Route('movies/delete/{slug}', methods: ['GET', 'DELETE'], name: 'movie_delete')]
+
+    #[Route('movies/delete/{slug}', name: 'movie_delete', methods: ['GET', 'DELETE'])]
     public function delete($slug): Response
     {
         $movie = $this->movieRepository->findOneBy(['slug' => $slug]);
@@ -176,6 +151,16 @@ class MovieController extends AbstractController
 
         return $this->redirectToRoute('movies');
 
+    }
+
+    #[Route('movies/{id}/render-file', name: 'movie_render_file')]
+    public function renderFile(int $id): Response
+    {
+        $movie = $this->movieRepository->findOneBy(['id' => $id]);
+        $dir = $this->getParameter('file_dir');
+//        dd($this->getParameter('file_dir'));
+
+        return new BinaryFileResponse(sprintf('%s%s', $dir, $movie->getImagePath()));
     }
 
     private function handleFileUpload(FormInterface $form, Movie $movie): void
@@ -187,14 +172,10 @@ class MovieController extends AbstractController
             $originalImagePath = sprintf('%s', pathinfo($imagePath->getClientOriginalName(), PATHINFO_FILENAME));
             $newImagePath = sprintf('%s_%s.%s', $originalImagePath, uniqid(), $imagePath->guessExtension());
 
-            try {
-                $imagePath->move(
-                    $this->getParameter('kernel.project_dir') . '/public/uploads',
-                    $newImagePath
-                );
-            } catch (FileException $e) {
-                throw $e;
-            }
+            $imagePath->move(
+                $this->getParameter('kernel.project_dir') . '/public/uploads',
+                $newImagePath
+            );
 
             $movie->setImagePath('/uploads/' . $newImagePath);
 

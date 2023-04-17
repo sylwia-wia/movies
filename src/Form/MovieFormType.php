@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Image;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\LessThan;
@@ -56,7 +57,6 @@ class MovieFormType extends AbstractType
                 'label' => false,
                 'placeholder' => 'Kategoria...',
                 'attr' => [
-
                     'class' => 'mt-10 bg-transparent border-b-2 text-6xl text-gray-400 h-20 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                 ],
 
@@ -71,11 +71,19 @@ class MovieFormType extends AbstractType
             ])
             ->add('imagePath', FileType::class, [
                 'required' => false,
+                'label' => false,
                 'mapped' => false,
+                'attr' => [
+                    'class' => 'block mb-2 text-sm font-medium text-gray-900 dark:text-white'
+                ],
+
             ])
+
 //            ->add('actors')
         ;
+
     }
+
 
     public function configureOptions(OptionsResolver $resolver): void
     {
