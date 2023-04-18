@@ -14,7 +14,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
     {
 
     }
-    public function onKernelController(ControllerEvent $event): void
+    public function onControllerEvent(ControllerEvent $event): void
     {
         $this->twig->addGlobal('movies', $this->movieRepository->findAll());
     }
@@ -22,7 +22,7 @@ class TwigEventSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::CONTROLLER => 'onKernelController',
+            KernelEvents::CONTROLLER => 'onControllerEvent',
         ];
     }
 }

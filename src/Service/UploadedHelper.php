@@ -5,6 +5,7 @@ namespace App\Service;
 use Container9MMQajI\get_Console_Command_ValidatorDebug_LazyService;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 
@@ -22,10 +23,16 @@ class UploadedHelper
         $destination = $this->projectDir;
         $newFileName =uniqid() . '.' . $uploadedFile->guessExtension();
 
-        $uploadedFile->move(
-            $destination,
-            $newFileName
-        );
+        try {
+            $uploadedFile->move(
+                $destination,
+                $newFileName
+            );
+        }
+        catch (FileException $e) {
+            return $e->getMessage();
+        }
+
 
         return $newFileName;
     }

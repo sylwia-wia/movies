@@ -6,6 +6,7 @@ use App\Dto\MovieFilterDto;
 use App\Entity\Comment;
 use App\Entity\Movie;
 use App\Entity\User;
+use App\EventSubscriber\TwigEventSubscriber;
 use App\Form\CommentFormType;
 use App\Form\MovieFilterType;
 use App\Form\MovieFormType;
@@ -81,6 +82,7 @@ class MovieController extends AbstractController
             if($uploadedFile)
             {
                 $newFileName = $uploadedHelper->uploadMovieImage($uploadedFile);
+
                 $movie->setImagePath('/uploads/' . $newFileName);
             }
 

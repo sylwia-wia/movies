@@ -13,6 +13,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[ORM\Entity(repositoryClass: MovieRepository::class)]
 #[UniqueEntity('slug')]
+#[ORM\HasLifecycleCallbacks]
 class Movie
 {
     #[ORM\Id]
@@ -69,6 +70,9 @@ class Movie
 
     #[ORM\Column(type:'string', length: 255, unique: true)]
     private ?string $slug = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $created_at = null;
 
 
     public function __construct()
@@ -211,6 +215,19 @@ class Movie
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAt(): self
+    {
+        $this->created_at = new \DateTimeImmutable();
 
         return $this;
     }
