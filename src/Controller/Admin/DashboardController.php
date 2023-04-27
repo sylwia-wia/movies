@@ -46,12 +46,22 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToDashboard('Dashboard', 'fa fa-home');
+        return [
+             MenuItem::section('Strona głowna'),
+             MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
 
-        yield MenuItem::linkToCrud('Users', 'fa fa-user', User::class);
-        yield MenuItem::linkToCrud('Movies', 'fas fa-tags', Movie::class);
-        yield MenuItem::linkToCrud('Categories', 'fas fa-tags', Category::class);
-        yield MenuItem::linkToCrud('Comments', 'fas fa-comment', Comment::class);
-        yield MenuItem::linkToCrud('Actors', 'fas fa-tags', Actor::class);
+             MenuItem::section('Użytkownik'),
+             MenuItem::linkToCrud('Users', 'fa fa-user', User::class),
+
+             MenuItem::section('Film'),
+             MenuItem::linkToCrud('Movies', 'fas fa-tags', Movie::class),
+             MenuItem::linkToCrud('Categories', 'fas fa-tags', Category::class),
+             MenuItem::linkToCrud('Comments', 'fas fa-comment', Comment::class),
+             MenuItem::linkToCrud('Actors', 'fas fa-tags', Actor::class),
+
+             MenuItem::section('Wyszukaj'),
+             MenuItem::linkToUrl('Wyszukaj w Google', 'fab fa-google', 'https://google.com'),
+        ];
+
     }
 }
